@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <!-- RESPONSIVENESS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- SEO OPTIMIZATION -->
+    <meta
+      name="description"
+      content="Check the current weather forecast for any city in the world. Fast, accurate, and easy-to-use weather app."
+    />
+    <meta name="author" content="ObiChukwu" />
+    <meta name="theme-color" content="#2193b0" />
+    <title>Weather App - Current Weather Forecast</title>
+
+    <!-- EXTERNAL CSS -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <!-- 
+      MAIN APP CONTAINER 
+      Holds: heading, search box, weather result card
+    -->
+    <main class="container">
+      <h1>Weather App</h1>
+
+      <!-- SEARCH BOX -->
+      <section class="search-box">
+        <label for="cityInput" class="visually-hidden"></label>
+        <input type="text" id="cityInput" placeholder="Enter a city name" />
+        <button type="button" id="actionBtn">Search</button>
+      </section>
+
+      <!-- WEATHER RESULT CARD (injected from JS) -->
+      <section class="weather-result" id="weatherResult" aria-live="polite">
+        <p>Enter a city above to get the current weather forecast.</p>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <p>&copy; 2025 Weather App • Built by FaithLogic</p>
+    </footer>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
