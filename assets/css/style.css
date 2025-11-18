@@ -1,17 +1,25 @@
+/* ---- REMOVE BROWSER IN-BUILT STYLES ---- */
+input, button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 /* -------- GLOBAL RESET -------- */
 html,
 body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  height: 100%;
-  overflow-x: hidden; /* prevents sideways scrolling */
+ 
+  /* prevents sideways scrolling */
+  overflow-x: hidden;
   font-family: Arial, Helvetica, sans-serif;
   background: linear-gradient(to right, #4facfe, #00f2fe);
 
-
   /* Ensures footer stays at the bottom */
   display: flex;
+  /* height: 100%; */
+  min-height: 100vh;
   flex-direction: column;
 }
 
@@ -29,11 +37,13 @@ body {
   box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
   transition: background 0.4s ease;
 
-  /** stronger fix **/
+  /* stronger fix */
   max-width: 350px;
   width: 100%;
   margin: auto;
-  box-sizing: border-box; /* ensures padding stays inside width */
+ 
+  /* ensures padding stays inside width */
+  box-sizing: border-box;
 }
 
 /* -------- HEADERS -------- */
@@ -57,10 +67,6 @@ h1 {
   border-radius: 6px;
   text-align: center;
 }
-
-/*.search-box-placeholder {
-  display: flex;
-}*/
 
 .search-box button {
   padding: 12px 20px;
@@ -172,6 +178,7 @@ footer {
   color: #ffffff;
   font-size: 0.9rem;
   opacity: 0.9;
+  /*margin-top: auto;*/
 }
 
 footer p {
