@@ -33,14 +33,13 @@ body {
   width: 90%;
   max-width: 420px;
   
-  margin: auto;
   box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
   transition: background 0.4s ease;
 
   /* stronger fix */
-  max-width: 350px;
-  width: 100%;
-  margin: auto;
+  /* max-width: 350px;*/
+  /* width: 100%; */
+   margin: auto;
  
   /* ensures padding stays inside width */
   box-sizing: border-box;
@@ -189,7 +188,7 @@ footer p {
 /* ------------------------
    RESPONSIVE — Search Box
 ------------------------- */
-@media (max-width: 480px) {
+@media (max-width: 600px) {
   .search-box {
     flex-direction: column;
     gap: 10px;
@@ -213,7 +212,7 @@ footer p {
 /* ---------------------------------------
    RESPONSIVE — Weather Card & Typography
 ---------------------------------------- */
-@media (max-width: 480px) {
+@media (max-width: 600px) {
 
   /* Card padding and spacing */
   .weather-card {
