@@ -187,3 +187,45 @@ footer p {
     max-width: 350px;
   }
 }
+
+/* ---------------------------------------
+   RESPONSIVE — Weather Card & Typography
+---------------------------------------- */
+@media (max-width: 480px) {
+
+  /* Card padding and spacing */
+  .weather-card {
+    padding: 18px;
+    border-radius: 12px;
+  }
+
+  /* Reduce weather icon size slightly */
+  .weather-result img {
+    width: 90px;
+    height: 90px;
+  }
+
+  /* Resize temperature text on small screens */
+  .temp-display {
+    font-size: 28px;
+  }
+
+  /* Adjust smaller paragraphs */
+  .weather-result p {
+    font-size: 15px;
+  }
+
+  /* Adjust city/date/time area */
+  .city-date {
+    font-size: 15px;
+  }
+
+  .city-time {
+    font-size: 16px;
+  }
+
+  /* Improve vertical spacing */
+  .city-date-time {
+    margin-top: 12px;
+  }
+}
