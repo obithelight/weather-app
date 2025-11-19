@@ -4,6 +4,7 @@
 ============================================================= 
 */
 
+// Public API Key 
 const apiKey = "af8fbe24883c891023e1721af134f40a";
 
 // Main UI elements
@@ -11,22 +12,27 @@ const actionBtn = document.getElementById("actionBtn");
 const cityInput = document.getElementById("cityInput");
 const weatherResult = document.getElementById("weatherResult");
 
+// Defensive checks and early fail message in console
+if (!actionBtn || !cityInput || !weatherResult) {
+  console.error("Missing required DOM elements. Check IDs in index.html");
+}
+
 // Interval references (cleared before reassigning)
 let localClockInterval = null; // Shows user's local clock on page load
 let cityClockInterval = null; // Runs city time after a search
 
+
 /*
 =============================================================
-2) UTILITY FUNCTIONS 
-** Simple Helper functions reused multiple times
+2) UTILITY FUNCTIONS: Simple Helper functions
 ============================================================= 
 */
 
 // (2.1) Capitalize Each Word in a string — for weather descriptions
-function capitalizeWords(str) {
-  return str
+function capitalizeWords(str = "") {
+  return String(str)
     .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word ? word[0].toUpperCase() + word.slice(1) : "")
     .join(" ");
 }
 
@@ -48,9 +54,8 @@ function displayUserLocalTime() {
   });
 
   weatherResult.innerHTML = `
-    <div class="fade-in weather-card">
-      <p>${formattedDate}</p>
-      <p>Current Local Time: ${formattedTime}</p>
+    <div class="parent-weather fade-in weather-card formatted-date-time">
+      <p>${formattedDate}<br> Current Local Time: ${formattedTime}</p>
     </div>
   `;
 }
@@ -77,15 +82,64 @@ function getCityLocalDateTime(offsetSeconds) {
   };
 }
 
+/* ========================= 
+X) Ripple Effect Function
+============================*/
+
+function addRippleEffect(event) {
+  const btn = event.currentTarget;
+
+  // Create ripple element
+  const ripple = document.createElement("span");
+  ripple.classList.add("ripple");
+
+  // Button dimensions
+  const rect = btn.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  ripple.style.width = ripple.style.height = `${size}px`;
+
+  // Position ripple at click point
+  const x = event.clientX - rect.left - size / 2;
+  const y = event.clientY - rect.top - size / 2;
+  ripple.style.left = `${x}px`;
+  ripple.style.top = `${y}px`;
+
+  // Add ripple to button
+  btn.appendChild(ripple);
+
+  // Remove ripple after animation
+  ripple.addEventListener("animationend", () => {
+    ripple.remove();
+  });
+}
+
+/* ----------- LOADING ----------- */
 // (2.4) Show loading text while fetching data
 function showLoading() {
+  //actionBtn.disabled = true;
   weatherResult.innerHTML = `
-    <div class="loading">Fetching weather...</div>
+    <div class="parent-weather fade-in weather-card loading">
+      <p style="padding: 10px;">Fetching weather...</p>
+    </div>
   `;
 }
 
 // (2.5) Show blinking error message in the local clock card
-function showBlinkingError(message, duration = 10000) {
+
+let errorBlinkInterval = null;
+let errorTimeout = null;
+
+function showBlinkingError(message, duration = 5000) {
+  // If an error is already showing, clear existing timers and replace message
+  if (errorBlinkInterval) {
+    clearInterval(errorBlinkInterval);
+    errorBlinkInterval = null;
+  }
+  if (errorTimeout) {
+    clearTimeout(errorTimeout);
+    errorTimeout = null;
+  }
+
   // Stop local clock
   if (localClockInterval) {
     clearInterval(localClockInterval);
@@ -93,22 +147,25 @@ function showBlinkingError(message, duration = 10000) {
   }
 
   let visible = true;
-
-  // Use the same weather-card container
-  const errorBlinkInterval = setInterval(() => {
+  errorBlinkInterval = setInterval(() => {
     weatherResult.innerHTML = `
-      <div class="fade-in weather-card" style="text-align:center; color:#FFB200;">
+      <div class="fade-in weather-card parent-weather">
         <p>${visible ? message : "&nbsp;"}</p>
       </div>
     `;
     visible = !visible;
-  }, 1000);
+  }, 2500);
 
-  // Restore local clock after 'duration' ms
-  setTimeout(() => {
-    clearInterval(errorBlinkInterval); // Stop blinking
-    displayUserLocalTime(); // Show clock immediately
-    localClockInterval = setInterval(displayUserLocalTime, 1000); // Resume clock
+  // Restore local clock after duration
+  errorTimeout = setTimeout(() => {
+    if (errorBlinkInterval) {
+      clearInterval(errorBlinkInterval);
+      errorBlinkInterval = null;
+    }
+
+    displayUserLocalTime();
+    localClockInterval = setInterval(displayUserLocalTime, 2000);
+    errorTimeout = null;
   }, duration);
 }
 
@@ -128,27 +185,36 @@ function showBlinkingError(message, duration = 10000) {
 */
 
 async function fetchWeather(city) {
-  let heartEmoji = "\u2764";
+  const heartEmoji = "\u2764";
+
+  /*
+  if (!navigator.onLine) {
+    showBlinkingError("Network error. Please check your internet connection.");
+    return;
+  }*/
+
+ // actionBtn.disabled = true;
+
   try {
     // (1) Start loading state
     showLoading();
+
+    // const controller = new AbortController();
+    // const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
+    // const signal = controller.signal;
 
     // (2) Build the API URL
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
 
     // (3) Send the API request
-    const response = await fetch(url);
+    const response = await fetch(url); 
+    //clearTimeout(timeoutId);
 
     // (4) If API returns an error (e.g., city not found)
     if (!response.ok) {
       showBlinkingError(`Oops, city not found ${heartEmoji}`);
       return;
     }
-    /** 
-    if (!response.ok) {
-    *** throw new Error(`oops, city not found ${heartEmoji}.`);
-    ** }
-    */
 
     // (5) Convert raw JSON into usable JS object
     const data = await response.json();
@@ -156,25 +222,23 @@ async function fetchWeather(city) {
     // (5B) Display weather result in UI
     displayWeather(data);
   } catch (error) {
-    /* 
-    -----------------------------------------
-    ERROR HANDLING
-    -----------------------------------------
-    */
 
     // (6A) Detect NETWORK error (no internet connection)
     const offlineErrors = ["Failed to fetch", "NetworkError", "load failed"];
 
-    if (offlineErrors.some((msg) => error.message.includes(msg))) {
-      showBlinkingError(
-        "Network error. Please check your internet connection."
-      );
+    if (error.name === 'AbortError') {
+      showBlinkingError("Request timed out. Please try again.");
       return;
     }
 
-    // Default API errors
+    if (offlineErrors.some((msg) => error.message.includes(msg))) {
+      showBlinkingError("Network error. Please check your internet connection.");
+      return;
+    }
+
+    // Default API error message
     showBlinkingError(error.message);
-  }
+    }
 }
 
 /* 
@@ -198,7 +262,7 @@ function displayWeather(data) {
 
   // (4.2) Prepare data for weather card
   const iconCode = data.weather[0].icon;
-  const iconUrl = `http://openweathermap.org/img/wn/${iconCode}@2x.png`;
+  const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
   const description = capitalizeWords(data.weather[0].description);
 
   const { formattedDate, formattedTime } = getCityLocalDateTime(data.timezone);
@@ -244,7 +308,7 @@ function displayWeather(data) {
       "linear-gradient(to right, #4b4b4b, #2e2e2e)";
   } else if (condition.includes("rain")) {
     document.body.style.background =
-      "linear-gradient(to right, #87CEEB, #0efe06)";
+      "linear-gradient(to right, #87CEEB, #00BFFF)";
   } else if (condition.includes("clear")) {
     document.body.style.background =
       "linear-gradient(to right, #FFFACD, #c3e4f3)";
@@ -265,74 +329,71 @@ function displayWeather(data) {
 
 /*
 =============================================================
-5) EVENT LISTENERS
+6) EVENT LISTENERS
 ** Button click, Enter key, default local clock
 ============================================================= 
 */
 
-// (5.1) Handle SEARCH button click
+// (6.1) Handle SEARCH button click
 actionBtn.addEventListener("click", () => {
   const city = cityInput.value.trim();
 
-  // (5.1A) Reject empty input
-  // if (city === "") {
-  //   weatherResult.innerHTML = `
-  //   <p style="color:#4facfe;">Search field cannot be blank.</p>
-  //   `;
-  //   return;
-  // }
-
-  if (city == "") {
-    showBlinkingError(`oh, no. Search field is empty.`);
-    return;
+  if (city === "") {
+      //showLoading();
+      showBlinkingError(`Search field cannot be empty.`);
+      return;
   }
 
-  // (5.1B) Reject inputs that contain NO letters (only numbers/symbols)
+  // (6.1B) Reject inputs that contain NO letters (only numbers/symbols)
   const lettersOnly = /[a-zA-Z]/;
 
-  // if (!lettersOnly.test(city)) {
-  //   let enterValidCity = "Invalid Characters. Letters Only.";
-  //   weatherResult.innerHTML = `
-  //     <p style="color:#ff4c4c;">
-  //       ${enterValidCity}
-  //     </p>
-  //   `;
-  //   return;
-  // }
-
   if (!lettersOnly.test(city)) {
-    showBlinkingError(`Invalid. Alphanumeric characters only.`);
+    showLoading();
+    showBlinkingError(`Only letters are allowed.`);
     return;
   }
-
-  // (5.1C) Require at least 2 characters
-  /**
-  if (city.length < 2) {
-    weatherResult.innerHTML = `
-      <p style="color:#FFB200;">
-        Try again. name is too short.
-      </p>
-    `;
-    return;
-  }
-  */
 
   if (city.length < 2) {
-    showBlinkingError(`Check spelling. name is too short.`);
+    showLoading();
+    showBlinkingError(`City name is too short.`);
     return;
   }
 
-  // (5.1D) If all checks pass → proceed with search
+  // (6.1D) If all checks pass → proceed with search
   fetchWeather(city);
 });
 
-// (5.2) Handle Enter key for search
-cityInput.addEventListener("keypress", (e) => {
+// (6.2) Handle Enter key for search
+cityInput.addEventListener("keyup", (e) => {
   if (e.key === "Enter") {
     actionBtn.click();
   }
 });
 
-// (5.3) Show user's local clock at start
+// (6.3) Show user's local clock at start
 displayUserLocalTime();
 localClockInterval = setInterval(displayUserLocalTime, 1000);
+
+/* 
+-----------------------------------------------
+7) U1-C: ULTRA-MINIMAL GLASS RIPPLE
+-----------------------------------------------
+*/
+
+actionBtn.addEventListener("mouseup", () => {
+  actionBtn.classList.add("bounce");
+
+  setTimeout(() => {
+    actionBtn.classList.remove("bounce");
+  }, 180); // matches animation duration
+});
+
+// For mobile touchscreens:
+actionBtn.addEventListener("touchend", () => {
+  actionBtn.classList.add("bounce");
+
+  setTimeout(() => {
+    actionBtn.classList.remove("bounce");
+  }, 180);
+});
+

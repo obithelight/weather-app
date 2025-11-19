@@ -67,7 +67,7 @@ h1 {
   text-align: center;
 }
 
-.search-box button {
+.action-btn {
   padding: 12px 20px;
   cursor: pointer;
   background: #4facfe;
@@ -75,19 +75,96 @@ h1 {
   border: none;
   border-radius: 6px;
   font-weight: bold;
-  transition: background 0.3s ease;
+  /*flex: 1;*/
+  transition: background 0.3s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  position: relative;
+
+  /* for ripple effect */
+  overflow: hidden;
 }
 
-.search-box button:hover {
-  border: 1px solid #ccc;
-  font-size: 0.9rem;
-  transform: scale(1.05) translateZ(5px);
+.action-btn:active {
+  transform: scale(0.94);
 }
 
-/* -------- WEATHER RESULT -------- */
+.action-btn:hover {
+  /*border: 1px solid #ccc;*/
+  /*font-size: 0.9rem;*/
+  /*transform: scale(1.05) translateZ(5px);*/
+  box-shadow: 0 0 12px rgba(79, 172, 254, 0.45);
+}
+
+/* =========================================================
+   (U1-C) ULTRA-MINIMAL "GLASS" RIPPLE EFFECT (iOS STYLE)
+   ========================================================= */
+.action-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+/*
+.action-btn .ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  transform: scale(0);
+  pointer-events: none;
+  backdrop-filter: blur(2px);
+  animation: glass-ripple 0.9s ease-out;
+}*/
+
+/* ===========================================
+   (U1-C+) Glass Ripple + Soft Glow
+=========================================== */
+.action-btn .ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(0);
+  pointer-events: none;
+  backdrop-filter: blur(3px);
+
+  /* ✨ GLOW EFFECT */
+  box-shadow:
+    0 0 10px rgba(255, 255, 255, 0.5),
+    0 0 25px rgba(255, 255, 255, 0.35),
+    0 0 45px rgba(255, 255, 255, 0.2);
+
+  animation: glass-ripple-glow 0.95s ease-out;
+}
+
+
+@keyframes glass-ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.45;
+  }
+  55% {
+    transform: scale(4);
+    opacity: 0.25;
+  }
+  100% {
+    transform: scale(6);
+    opacity: 0;
+  }
+}
+
+/* -----------------------
+ * WEATHER RESULTS
+ * ---------------------- */
 .weather-result {
   margin-top: 20px;
   text-align: center;
+}
+
+.weather-card {
+/*  height: 60px;*/
+  /*display: flex;*/
+  /*align-items: center;*/
+  padding: 15px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .weather-result img {
@@ -97,13 +174,13 @@ h1 {
   margin: 0 auto;
 }
 
-/* Weather card */
-.weather-card {
-  padding: 15px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+/*
+.parent-weather {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+*/
 
 .temp-display {
   font-size: 34px;
@@ -134,6 +211,15 @@ h1 {
   font-size: 18px;
   font-weight: bold;
   margin-top: 5px;
+}
+
+/*.formatted-date-time {
+  display: grid;
+  place-items: center;
+}*/
+
+.formatted-date-time p {
+  line-height: 1.5;
 }
 
 /* -------- LOADING ANIMATION-------- */
@@ -170,19 +256,33 @@ h1 {
   }
 }
 
-/* -------- FOOTER -------- */
-footer {
-  text-align: center;
-  background-color: rgba(0, 0, 0, 0.2);
-  color: #ffffff;
-  font-size: 0.9rem;
-  opacity: 0.9;
-  /*margin-top: auto;*/
-}
+@keyframes glass-ripple-glow {
+  0% {
+    transform: scale(0);
+    opacity: 0.55;
+    box-shadow:
+      0 0 10px rgba(255, 255, 255, 0.6),
+      0 0 25px rgba(255, 255, 255, 0.4),
+      0 0 45px rgba(255, 255, 255, 0.25);
+  }
 
-footer p {
-  margin: 0;
-  padding: 0.9rem;
+  55% {
+    transform: scale(4);
+    opacity: 0.3;
+    box-shadow:
+      0 0 18px rgba(255, 255, 255, 0.5),
+      0 0 35px rgba(255, 255, 255, 0.35),
+      0 0 60px rgba(255, 255, 255, 0.2);
+  }
+
+  100% {
+    transform: scale(6);
+    opacity: 0;
+    box-shadow:
+      0 0 25px rgba(255, 255, 255, 0),
+      0 0 60px rgba(255, 255, 255, 0),
+      0 0 80px rgba(255, 255, 255, 0);
+  }
 }
 
 /* ------------------------
@@ -208,6 +308,86 @@ footer p {
     max-width: 350px;
   }
 }
+
+/* =========================================================
+   (A1) MICRO-BOUNCE BUTTON PRESS (NATIVE FEEL)
+   ========================================================= */
+.action-btn {
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.action-btn:active {
+  transform: scale(0.96); /* slightly shrink on tap */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* Bounce-back effect after press */
+@keyframes buttonBounce {
+  0%   { transform: scale(0.96); }
+  60%  { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+.action-btn.bounce {
+  animation: buttonBounce 0.18s ease-out;
+}
+
+/* ===========================================
+   (E1) Improved Error Box UI
+=========================================== */
+.error-box {
+  background: #fff7d1;
+  color: #8a6d00;
+  border: 1px solid #e6d18a;
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin-top: 18px;
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+
+  animation: errorSlideIn 0.35s ease-out;
+  box-shadow: 0 0 8px rgba(255, 227, 100, 0.45);
+}
+
+.error-icon {
+  font-size: 20px;
+}
+
+/* Slide-in animation */
+@keyframes errorSlideIn {
+  from {
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+
+/* -------- FOOTER -------- */
+footer {
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.2);
+  color: #ffffff;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  /*margin-top: auto;*/
+}
+
+footer p {
+  margin: 0;
+  padding: 0.9rem;
+}
+
+
+/*==============E=N=D=================*/
+
 
 /* ---------------------------------------
    RESPONSIVE — Weather Card & Typography
